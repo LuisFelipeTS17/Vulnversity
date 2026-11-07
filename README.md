@@ -67,13 +67,23 @@ gobuster dir -u http://<MACHINE_IP>:3333 \
 
 * **Endpoint crítico descoberto:** `/internal/` — hospeda um formulário de **upload de arquivos**.
 
+![Gobuster descobrindo /internal](docs/screenshots/input_file_3.png)
+<p align="center"><sub>Gobuster enumerando a aplicação na porta 3333 e revelando <code>/internal</code> (301).</sub></p>
+
 ---
 
 ## 💥 Fase 3 — Comprometimento Web (File Upload Bypass → RCE)
 
 Exploração do formulário de upload para obter execução remota de código.
 
+![Formulário de upload em /internal/](docs/screenshots/input_file_5.png)
+<p align="center"><sub>Formulário de upload exposto em <code>/internal/</code>.</sub></p>
+
 1. **Fuzzing de extensões (Burp Suite Intruder — ataque *Sniper*):** teste de extensões PHP alternativas a partir de [`scripts/phpext.txt`](scripts/phpext.txt) — `.php`, `.php3`, `.php4`, `.php5`, `.phtml`.
+
+   ![Burp Intruder — posições do payload (Sniper)](docs/screenshots/input_file_11.png)
+   <p align="center"><sub>Burp Intruder (Sniper) marcando a extensão do <code>filename</code> como posição de payload.</sub></p>
+
 2. **Bypass identificado:** o servidor bloqueia `.php`, mas **não filtra `.phtml`**.
 3. **Payload:** upload de um reverse shell PHP (`php-reverse-shell.phtml`) com o IP da VPN (`tun0`) e porta de escuta configurados.
 4. **Listener:**
@@ -127,7 +137,7 @@ Vulnversity/
     └── phpext.txt         # Wordlist de extensões para o bypass de upload
 ```
 
-📄 Relatório técnico completo (com capturas de tela): [`docs/report.md`](docs/report.md)
+📄 Relatório técnico completo **com todas as 13 capturas de tela** da sessão: [`docs/report.md`](docs/report.md)
 
 ---
 
