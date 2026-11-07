@@ -7,32 +7,33 @@
 ---
 
 ## 1. Executive Summary
-Este relatório documenta o processo técnico de auditoria e exploração da máquina virtual **Vulnversity** no TryHackMe. O laboratório simulou um ambiente web vulnerável, permitindo demonstrar falhas de arquitetura em servidores web, fraquezas em validação de inputs em formulários de upload e falhas de configuração em permissões especiais de ficheiros (SUID) em sistemas operacionais Linux baseados em Ubuntu.
+Este relatório documenta o processo técnico de auditoria e exploração da máquina virtual **Vulnversity** no TryHackMe. O laboratório simulou um ambiente web vulnerável, permitindo demonstrar falhas de arquitetura em servidores web, fraquezas em validação de inputs em formulários de upload e falhas de configuração em permissões especiais de ficheiros (SUID) em sistemas operacionais Linux baseados em Ubuntu. O resultado foi o comprometimento total do alvo, partindo de um acesso não autenticado até privilégios de **root**.
 
 ---
 
 ## 2. Metodologia e Fases de Execução
 
 ### 2.1. Reconhecimento Ativo
-O levantamento de portas e serviços abertos foi efetuado combinando varreduras de pacotes TCP SYN furtivos (`-sS`) com deteção agressiva de versões e serviços (`-sV` / `-A`). A porta `3333` destacou-se por hospedar um servidor HTTP Apache atípico (`Apache httpd 2.4.41`).
+O levantamento de portas e serviços foi efetuado em duas etapas: varredura TCP SYN furtiva com detecção de versões (`nmap -sS -sV`) e, em seguida, varredura agressiva (`nmap -A`) para scripts e fingerprint do SO. Foram identificadas **6 portas abertas**, destacando-se a porta `3333`, que hospeda um `Apache httpd 2.4.41` com título `Vuln University`.
 
 ### 2.2. Enumeração de Diretórios Web
-Utilizou-se a ferramenta **Gobuster** em conjunto com a wordlist clássica do DirBuster (`directory-list-1.0.txt`) para realizar força bruta de diretórios na porta `3333`:
+Utilizou-se a ferramenta **Gobuster** com a wordlist clássica do DirBuster (`directory-list-1.0.txt`) para força bruta de diretórios na porta `3333`:
 * **Comando:** `gobuster dir -u http://<IP>:3333 -w /usr/share/wordlists/dirbuster/directory-list-1.0.txt`
 * **Descoberta Crítica:** Identificação do diretório `/internal/`, que continha um formulário de carregamento de ficheiros (*file upload form*).
 
 ### 2.3. Contorno de Filtros (Bypass) e Execução de Código
-Para injetar um *Reverse Shell*, testou-se a robustez do filtro de extensões do servidor utilizando o Burp Suite Intruder com a wordlist de extensões (`phpext.txt`).
+A requisição de upload foi interceptada no **Burp Suite** e enviada ao Intruder (ataque *Sniper*) para testar a robustez do filtro de extensões, utilizando a wordlist `phpext.txt`. O servidor bloqueia `.php`, mas aceita **`.phtml`**. Foi carregado um reverse shell PHP (`images.phtml`), e o seu acesso via navegador estabeleceu um shell interativo como `www-data`.
+
+### 2.4. Escalonamento de Privilégios (SUID)
+A enumeração de binários SUID (`find / -perm -u=s -type f 2>/dev/null`) revelou `/bin/systemctl`. Através da criação de um serviço `systemd` malicioso que executa `chmod +s /bin/bash`, seguido de `/bin/bash -p`, obteve-se um shell com **EUID 0 (root)**.
 
 ---
 
 ## 3. Registo Fotográfico (Capturas de Ecrã da Sessão)
 
-Abaixo encontram-se registadas todas as capturas de ecrã obtidas durante o laboratório, guardadas na pasta `docs/screenshots/`:
+As capturas estão organizadas por fase, na pasta `docs/screenshots/`.
 
-### Captura: input_file_0.png
-
-#### Fase 1 — Reconhecimento (Nmap)
+### Fase 1 — Reconhecimento (Nmap)
 
 ![Nmap — scan de serviços](screenshots/nmap_service_scan.png)
 ![Nmap — scan furtivo + agressivo](screenshots/nmap_ss_sv_and_a.png)
@@ -42,55 +43,28 @@ Abaixo encontram-se registadas todas as capturas de ecrã obtidas durante o labo
 ![TryHackMe — respostas do Nmap](screenshots/thm_nmap_answers.png)
 ![TryHackMe — SO alvo (Ubuntu)](screenshots/thm_os_answer.png)
 
-#### Demais capturas
+### Fase 2 — Enumeração de Diretórios (Gobuster)
 
-![input_file_0.png](screenshots/input_file_0.png)
+![Gobuster — /internal descoberto](screenshots/01-gobuster.png)
+![TryHackMe — resposta Gobuster correta](screenshots/02-thm-gobuster-correto.png)
 
-### Captura: input_file_1.png
+### Fase 3 — Comprometimento Web (Upload Bypass → RCE)
 
-![input_file_1.png](screenshots/input_file_1.png)
+![Formulário de upload](screenshots/03-upload-form.png)
+![Burp Proxy — interceptação](screenshots/04-burp-intercept.png)
+![Burp Intruder — posições (Sniper)](screenshots/05-intruder-positions.png)
+![Burp Intruder — payloads](screenshots/06-intruder-payloads.png)
+![Burp Intruder — resultados](screenshots/07-intruder-results.png)
+![Burp Intruder — resposta](screenshots/08-intruder-response.png)
+![Upload bem-sucedido (images.phtml)](screenshots/09-upload-success.png)
+![Payload PHP (reverse shell)](screenshots/10-shell-payload.png)
+![Netcat — listener](screenshots/11-nc-listening.png)
+![Reverse shell como www-data](screenshots/12-reverse-shell.png)
 
-### Captura: input_file_10.png
+### Fase 4 — Escalonamento de Privilégios (SUID)
 
-![input_file_10.png](screenshots/input_file_10.png)
-
-### Captura: input_file_11.png
-
-![input_file_11.png](screenshots/input_file_11.png)
-
-### Captura: input_file_12.png
-
-![input_file_12.png](screenshots/input_file_12.png)
-
-### Captura: input_file_2.png
-
-![input_file_2.png](screenshots/input_file_2.png)
-
-### Captura: input_file_3.png
-
-![input_file_3.png](screenshots/input_file_3.png)
-
-### Captura: input_file_4.png
-
-![input_file_4.png](screenshots/input_file_4.png)
-
-### Captura: input_file_5.png
-
-![input_file_5.png](screenshots/input_file_5.png)
-
-### Captura: input_file_6.png
-
-![input_file_6.png](screenshots/input_file_6.png)
-
-### Captura: input_file_7.png
-
-![input_file_7.png](screenshots/input_file_7.png)
-
-### Captura: input_file_8.png
-
-![input_file_8.png](screenshots/input_file_8.png)
-
-### Captura: input_file_9.png
-
-![input_file_9.png](screenshots/input_file_9.png)
-
+![Enumeração SUID](screenshots/14-suid-enum.png)
+![Arquivo de serviço systemd](screenshots/15-service-file.png)
+![Exploração via systemctl](screenshots/16-systemctl-exploit.png)
+![EUID 0 — root obtido](screenshots/17-root-euid.png)
+![Flag de root capturada](screenshots/18-root-flag.png)
