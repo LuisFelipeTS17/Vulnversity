@@ -32,6 +32,18 @@ Abaixo encontram-se registadas todas as capturas de ecrã obtidas durante o labo
 
 ### Captura: input_file_0.png
 
+#### Fase 1 — Reconhecimento (Nmap)
+
+![Nmap — scan de serviços](screenshots/nmap_service_scan.png)
+![Nmap — scan furtivo + agressivo](screenshots/nmap_ss_sv_and_a.png)
+![Nmap — scan agressivo (-A)](screenshots/nmap_aggressive_scan.png)
+![Nmap — visão geral](screenshots/nmap_scan_overview.png)
+![Nmap — cheatsheet de flags](screenshots/nmap_flags_cheatsheet.png)
+![TryHackMe — respostas do Nmap](screenshots/thm_nmap_answers.png)
+![TryHackMe — SO alvo (Ubuntu)](screenshots/thm_os_answer.png)
+
+#### Demais capturas
+
 ![input_file_0.png](screenshots/input_file_0.png)
 
 ### Captura: input_file_1.png

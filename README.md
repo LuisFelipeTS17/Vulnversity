@@ -38,21 +38,25 @@ Nmap ──► Gobuster ──► /internal/ (upload) ──► bypass .phtml �
 
 ## 🛠️ Fase 1 — Reconhecimento (Nmap)
 
-Descoberta de portas e serviços combinando varredura TCP SYN furtiva com detecção agressiva de versões.
+Descoberta de portas e serviços em duas etapas: varredura TCP SYN furtiva com detecção de versões e, em seguida, varredura agressiva para scripts e fingerprint do SO.
 
 ```bash
-nmap -sS -sV -A <MACHINE_IP>
+nmap -sS -sV <MACHINE_IP>   # scan furtivo + versões dos serviços
+nmap -A <MACHINE_IP>        # scripts, OS detection e fingerprint
 ```
 
 | Porta | Serviço | Versão |
 |-------|---------|--------|
-| 21 | FTP | vsftpd 3.0.x |
+| 21 | FTP | vsftpd 3.0.5 |
 | 22 | SSH | OpenSSH 8.2p1 (Ubuntu) |
 | 139 / 445 | SMB | Samba smbd 4.6.2 |
 | 3128 | HTTP Proxy | Squid 4.10 |
-| **3333** | **HTTP** | **Apache httpd 2.4.41 (Ubuntu)** |
+| **3333** | **HTTP** | **Apache httpd 2.4.41 (Ubuntu)** — `http-title: Vuln University` |
 
-> 💡 A porta **3333** chama atenção por hospedar um servidor web em porta não convencional — alvo prioritário.
+> 💡 **6 portas abertas.** A porta **3333** chama atenção por hospedar um servidor web em porta não convencional — alvo prioritário.
+
+![Nmap — scan de serviços](docs/screenshots/nmap_service_scan.png)
+<p align="center"><sub>Varredura <code>nmap -sS -sV</code> revelando as 6 portas abertas e as versões dos serviços.</sub></p>
 
 ---
 
