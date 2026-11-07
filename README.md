@@ -19,7 +19,7 @@ por fim, escalonamento de privilégios local em Linux explorando um binário com
 |------|---------|
 | **Alvo** | Máquina virtual TryHackMe — Vulnversity (*Vuln University*) |
 | **SO** | Ubuntu (Linux) |
-| **Autor** | Luís Felipe Nepomuceno de Moraes |
+| **Autor** | [@LuisFelipeTS17](https://github.com/LuisFelipeTS17) |
 | **Resultado** | Comprometimento total (shell como `www-data` → `root`) |
 | **Técnicas** | Port scanning, dir bruteforce, file-upload bypass, reverse shell, SUID privesc |
 

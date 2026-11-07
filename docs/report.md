@@ -1,6 +1,6 @@
 # Relatório Técnico de Teste de Intrusão: Lab Vulnversity (TryHackMe)
 
-**Autor:** Luís Felipe Nepomuceno de Moraes  
+**Autor:** [@LuisFelipeTS17](https://github.com/LuisFelipeTS17)  
 **Alvo:** Máquina Virtual TryHackMe - Vulnversity  
 **Nível:** Fácil  
 
